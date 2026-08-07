@@ -1,0 +1,17 @@
+class Solution {
+    public int largestAltitude(int[] gain) {
+
+        int currentAltitude = 0;
+        int highestPoint = 0;
+
+        for (int altitudeGain : gain) {
+            currentAltitude += altitudeGain;
+
+            if (currentAltitude > highestPoint) {
+                highestPoint = currentAltitude;
+            }
+        }
+
+        return highestPoint;
+    }
+}
