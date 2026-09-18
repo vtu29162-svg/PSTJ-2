@@ -1,0 +1,115 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+
+    static int n;
+    static String s;
+
+    // Manacher's algorithm
+    static int[] manacher(String str) {
+        int m = str.length();
+        int[] p = new int[m];
+
+        int center = 0;
+        int right = 0;
+
+        for (int i = 0; i < m; i++) {
+
+            int mirror = 2 * center - i;
+
+            if (i < right) {
+                p[i] = Math.min(right - i, p[mirror]);
+            }
+
+            while (i + p[i] + 1 < m &&
+                   i - p[i] - 1 >= 0 &&
+                   str.charAt(i + p[i] + 1) ==
+                   str.charAt(i - p[i] - 1)) {
+                p[i]++;
+            }
+
+            if (i + p[i] > right) {
+                center = i;
+                right = i + p[i];
+            }
+        }
+
+        return p;
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        n = Integer.parseInt(br.readLine().trim());
+        s = br.readLine().trim();
+
+        // Make circular string
+        String t = s + s;
+
+        int m = 2 * n;
+
+        /*
+         * Transformed string:
+         * #a#b#c#
+         *
+         * This makes odd and even length palindromes
+         * easier to handle with Manacher's algorithm.
+         */
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < m; i++) {
+            sb.append('#');
+            sb.append(t.charAt(i));
+        }
+        sb.append('#');
+
+        String transformed = sb.toString();
+
+        int[] p = manacher(transformed);
+
+        int[] answer = new int[n];
+
+        /*
+         * Each palindrome in t can belong to one or more
+         * rotations. We process palindrome centers.
+         */
+        for (int center = 0; center < transformed.length(); center++) {
+
+            int radius = p[center];
+
+            // Maximum useful palindrome length is n
+            radius = Math.min(radius, n);
+
+            int palindromeLength = radius;
+
+            if (palindromeLength <= 0)
+                continue;
+
+            /*
+             * Convert transformed-string position to
+             * original-string starting position.
+             */
+            int start = (center - radius) / 2;
+
+            if (start < 0)
+                start = 0;
+
+            /*
+             * A palindrome of length L beginning at position
+             * start is contained in rotations whose starting
+             * positions are covered by that palindrome.
+             */
+            int end = start + palindromeLength - 1;
+
+            for (int rot = start; rot <= end && rot < n; rot++) {
+                answer[rot] = Math.max(answer[rot], palindromeLength);
+            }
+        }
+
+        for (int i = 0; i < n; i++) {
+            System.out.println(answer[i]);
+        }
+    }
+}
